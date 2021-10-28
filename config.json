@@ -1,0 +1,14 @@
+{
+  "connection": {
+    "protocol": "ssh or telnet",
+    "ip": "255.255.255.255",
+    "port": "1337"
+  },
+  "credentials": {
+    "username": "user",
+    "password": "pass"
+  },
+  "mfa": {
+    "token": "authenticator token"
+  }
+}
