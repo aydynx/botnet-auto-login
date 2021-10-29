@@ -3,13 +3,14 @@ const totp = require("totp-generator");
 const config = require("./config.json");
 const mappings = require("./mappings.json");
 
+let connection;
 if (config.connection.protocol === "ssh") {
-    var connection = child.spawn("ssh", [config.connection.ip, "-p", config.connection.port, "-l", config.credentials.username]);
+    connection = child.spawn("ssh", [config.connection.ip, "-p", config.connection.port, "-l", config.credentials.username]);
     connection.stdin.write(config.credentials.password);
 } else if (config.connection.protocol === "telnet") {
-    var connection = child.spawn("telnet", [config.connection.ip, config.connection.port]);
+    connection = child.spawn("telnet", [config.connection.ip, config.connection.port]);
 } else {
-    console.log("invalid protocol");
+    console.log("invalid protocol")
 }
 
 connection.stdin.write("\n");
@@ -39,9 +40,6 @@ connection.stdout.on("data", (data) => {
                         offset--;
                     }
                 }
-                if (line.toLowerCase().includes("2fa" || "authenticator" || "mfa")) {
-                    connection.stderr.write(totp(config.mfa.token) + "\n");
-                }
                 if (config.connection.protocol === "telnet") {
                     connection.stdin.write("\n" + config.credentials.username + "\n" + config.credentials.password + "\n");
                 }
@@ -49,10 +47,14 @@ connection.stdout.on("data", (data) => {
             } else if (line.trim()) {
                 buffer += line + "\n";
             }
+        } else if (state === 3) {
+            if (["2fa", "code", "authenticator", "mfa"].some(s => line.toLowerCase().includes(s))) {
+                connection.stdin.write(totp(config.mfa.token) + "\n");
+                state = 4;
+            }
         }
     }
 });
-
 
 function captchaParse(x, s) {
     const lines = s.split("\n");
