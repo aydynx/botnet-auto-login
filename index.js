@@ -35,7 +35,7 @@ connection.stdout.on("data", (data) => {
                 for (let i = 0; i < 5; i++) {
                     let letter = captchaParse(offset, buffer);
                     connection.stdin.write(letter);
-                    offset += 15;
+                    offset += 16;
                     while (captchaParse(offset, buffer) === undefined) {
                         offset--;
                     }
